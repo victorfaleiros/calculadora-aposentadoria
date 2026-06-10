@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Inflação · Victor Faleiros</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F2EEE4;--ink:#22201B;--muted:#8C8160;--soft:#6E6A5E;--line:rgba(34,32,27,0.14);
+  --gold:#9A8A52;--card:rgba(34,32,27,0.025);
+  --serif:'EB Garamond',Georgia,serif;--sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+html,body{background:#3a3833;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+/* ===== GATE ===== */
+.gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#26241f}
+.gate-card{width:100%;max-width:420px;background:var(--paper);border-radius:16px;padding:38px 34px;box-shadow:0 30px 70px rgba(0,0,0,0.5)}
+.gate-eyebrow{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:10px}
+.gate-card h1{font-family:var(--serif);font-size:27px;font-weight:600;letter-spacing:-0.01em;margin-bottom:6px}
+.gate-card .sub{font-size:13px;color:var(--soft);line-height:1.6;margin-bottom:22px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-weight:600;margin-bottom:6px}
+.field input{width:100%;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 13px;font-size:15px;font-family:var(--sans);color:var(--ink);outline:none}
+.field input:focus{border-color:var(--gold)}
+.gate-btn{width:100%;margin-top:8px;padding:14px;border:none;border-radius:10px;background:var(--ink);color:var(--paper);font-size:14px;font-weight:600;font-family:var(--sans);cursor:pointer;letter-spacing:0.02em}
+.gate-btn:disabled{opacity:.6;cursor:not-allowed}
+.gate-err{font-size:12.5px;color:#b4452f;margin-top:12px;min-height:16px;line-height:1.5}
+.gate-hint{font-size:11px;color:var(--muted);margin-top:16px;line-height:1.5}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(242,238,228,0.35);border-top-color:var(--paper);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:7px}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ===== TOOLBAR ===== */
+.toolbar{position:sticky;top:0;z-index:20;display:flex;gap:10px;align-items:center;justify-content:center;padding:12px;background:#26241f;border-bottom:1px solid rgba(255,255,255,0.06)}
+.tb-btn{padding:10px 18px;border-radius:9px;border:1px solid rgba(242,238,228,0.25);background:transparent;color:var(--paper);font-size:13px;font-weight:600;font-family:var(--sans);cursor:pointer}
+.tb-btn.primary{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.tb-note{color:rgba(242,238,228,0.6);font-size:12px}
+/* ===== DOC ===== */
+.doc{max-width:794px;margin:0 auto;padding:22px 16px 60px}
+.sheet{background:var(--paper);width:100%;min-height:1040px;padding:60px 58px;margin-bottom:26px;position:relative;box-shadow:0 18px 50px rgba(0,0,0,0.4);display:flex;flex-direction:column}
+.sheet-head{display:flex;justify-content:space-between;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.sheet-foot{margin-top:auto;padding-top:30px;display:flex;justify-content:space-between;font-size:9.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);border-top:1px solid var(--line);font-style:normal}
+.sheet-foot .l{font-style:italic;font-family:var(--serif);text-transform:none;letter-spacing:0.02em;font-size:12px;color:var(--soft)}
+h2.title{font-family:var(--serif);font-size:40px;font-weight:500;letter-spacing:-0.01em;margin:30px 0 0}
+h2.title em{font-style:italic}
+.lead-in{font-size:14px;color:var(--soft);line-height:1.75;max-width:560px;margin-top:18px}
+.label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+/* grid */
+.kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:30px;border-top:1px solid var(--line)}
+.kv{padding:20px 4px;border-bottom:1px solid var(--line)}
+.kv:nth-child(odd){padding-right:24px}
+.kv:nth-child(even){padding-left:24px;border-left:1px solid var(--line)}
+.kv .label{margin-bottom:7px}
+.kv .val{font-family:var(--serif);font-size:25px;font-weight:500}
+.section-label{font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:34px 0 16px}
+/* params row */
+.params{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:20px 0;margin-top:8px}
+.params .p .label{margin-bottom:8px;font-size:9.5px}
+.params .p .val{font-family:var(--serif);font-size:19px;font-weight:500}
+/* big number */
+.big-stat{margin-top:54px}
+.big-stat .label{margin-bottom:14px}
+.big-stat .num{font-family:var(--serif);font-size:74px;font-weight:500;letter-spacing:-0.02em;line-height:1}
+.note{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--soft);line-height:1.65;margin-top:40px;max-width:560px}
+.body-p{font-size:13.5px;color:#3a382f;line-height:1.8;margin-top:18px;max-width:580px}
+.body-p+.body-p{margin-top:14px}
+/* dual cards */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:30px;border-top:1px solid var(--line)}
+.duo .cell{padding:22px 4px 22px;border-bottom:1px solid var(--line)}
+.duo .cell:nth-child(even){padding-left:26px;border-left:1px solid var(--line)}
+.duo .cell:nth-child(odd){padding-right:26px}
+.duo .cell .label{margin-bottom:10px}
+.duo .cell .num{font-family:var(--serif);font-size:38px;font-weight:500;letter-spacing:-0.01em;line-height:1.05}
+.duo .cell .num.dim{color:var(--soft)}
+.duo .cell .cap{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.4}
+.infl-tag{display:inline-block;margin-top:22px;font-size:11px;letter-spacing:0.04em;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 13px}
+/* cover */
+.cover{justify-content:space-between}
+.cover .name{font-family:var(--serif);font-size:58px;font-weight:500;line-height:1.05;letter-spacing:-0.01em;margin-bottom:6px}
+.cover .name em{font-style:italic;display:block}
+.cover-mid{margin-top:auto;margin-bottom:auto}
+.cover-bottom{display:flex;justify-content:space-between;align-items:flex-end}
+.cover-bottom .l{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--ink)}
+.cover-bottom .l small{display:block;font-family:var(--sans);font-style:normal;font-size:12px;color:var(--soft);margin-top:4px;letter-spacing:0.02em}
+.cover-bottom .r{font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:right;line-height:1.7}
+/* closing */
+.close-title{font-family:var(--serif);font-size:34px;font-weight:500;line-height:1.25;letter-spacing:-0.01em;margin-top:20px;max-width:600px}
+.close-rule{width:46px;height:2px;background:var(--gold);margin:26px 0 4px}
+.contact{margin-top:auto}
+.contact .label{margin-bottom:10px}
+.contact .sig{font-family:var(--serif);font-style:italic;font-size:22px}
+.contact .info{font-size:13px;color:var(--soft);margin-top:8px;line-height:1.7}
+.disclaimer{font-size:10px;color:var(--muted);line-height:1.6;margin-top:26px;max-width:600px}
+.hidden{display:none}
+/* ===== PRINT ===== */
+@media print{
+  @page{size:A4;margin:0}
+  html,body{background:#fff}
+  .gate,.toolbar{display:none!important}
+  .doc{max-width:none;margin:0;padding:0}
+  .sheet{box-shadow:none;margin:0;width:210mm;min-height:297mm;padding:20mm 18mm;page-break-after:always;break-after:page;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet:last-child{page-break-after:auto}
+}
+@media(max-width:640px){
+  .sheet{padding:38px 26px;min-height:auto}
+  .big-stat .num{font-size:48px}
+  .cover .name{font-size:40px}
+  .duo .cell .num{font-size:30px}
+  h2.title{font-size:30px}
+}
+</style>
+</head>
+<body>
+
+<!-- GATE -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="gate-eyebrow">Uso interno · Victor Faleiros</div>
+    <h1>Gerador de relatório</h1>
+    <p class="sub">Digite o WhatsApp do lead para buscar a simulação dele e montar o relatório de inflação.</p>
+    <div class="field">
+      <label>WhatsApp do lead</label>
+      <input id="phone" inputmode="tel" placeholder="(11) 91234-5678" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Senha de acesso</label>
+      <input id="password" type="password" placeholder="Sua senha" autocomplete="off">
+    </div>
+    <button class="gate-btn" id="genBtn">Gerar relatório</button>
+    <div class="gate-err" id="gateErr"></div>
+    <div class="gate-hint">A senha protege os dados dos leads. Ela fica guardada só neste aparelho.</div>
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar hidden" id="toolbar">
+  <button class="tb-btn primary" id="pdfBtn">Salvar PDF</button>
+  <button class="tb-btn" id="newBtn">Nova busca</button>
+  <span class="tb-note">Ao salvar: papel A4 e marque "Gráficos de fundo".</span>
+</div>
+
+<!-- DOC -->
+<div class="doc hidden" id="doc"></div>
+
+<script>
+const FN_URL = "https://oumcsjqiuitzosrgnhbr.supabase.co/functions/v1/lead-report";
+const INFLACAO = 0.045; // 4,5% a.a. para todos
+const MESES = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+
+function groupThousands(n){
+  const neg = n < 0; let s = String(Math.round(Math.abs(n)));
+  s = s.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return (neg?"-":"") + s;
+}
+const brl = v => "R$ " + groupThousands(v);
+const onlyDigits = s => (s||"").replace(/\D/g,"");
+
+// máscara telefone
+const phoneEl = document.getElementById("phone");
+phoneEl.addEventListener("input", () => {
+  let d = onlyDigits(phoneEl.value).slice(0,11), out=d;
+  if(d.length>7) out="("+d.slice(0,2)+") "+d.slice(2,7)+"-"+d.slice(7);
+  else if(d.length>2) out="("+d.slice(0,2)+") "+d.slice(2);
+  phoneEl.value = out;
+});
+
+// lembra a senha
+const passEl = document.getElementById("password");
+try{ const saved = localStorage.getItem("vf_report_pass"); if(saved) passEl.value = saved; }catch(e){}
+
+function esc(s){ return String(s).replace(/[&<>]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+function firstNames(nome){ return esc(String(nome||"").trim()); }
+
+function buildReport(lead){
+  const nome = String(lead.nome||"Cliente").trim();
+  const perfil = lead.perfil || "-";
+  const idadeAtual = +lead.idade_atual;
+  const idadeApos = +lead.idade_aposentadoria;
+  const anos = +lead.anos_contribuicao;
+  const patAtual = +lead.patrimonio_atual;
+  const aporte = +lead.aporte_mensal;
+  const patNominal = +lead.patrimonio_projetado;
+  const rendaNominal = +lead.renda_passiva_mensal;
+  const defl = Math.pow(1+INFLACAO, anos);
+  const patReal = patNominal/defl;
+  const rendaReal = rendaNominal/defl;
+
+  const hoje = new Date();
+  const dataStr = hoje.getDate()+" de "+MESES[hoje.getMonth()]+" de "+hoje.getFullYear();
+  const footRight = esc(nome.toUpperCase())+" / RELATÓRIO DE INFLAÇÃO";
+  const foot = `<div class="sheet-foot"><span class="l">Victor Faleiros, CFP®</span><span>${footRight}</span></div>`;
+
+  return `
+  <!-- CAPA -->
+  <div class="sheet cover">
+    <div class="sheet-head"><span>Preparado para</span><span>Victor Faleiros, CFP®</span></div>
+    <div class="cover-mid">
+      <div class="label" style="margin-bottom:18px">Relatório de inflação</div>
+      <div class="name">${esc(nome)}</div>
+    </div>
+    <div class="cover-bottom">
+      <div class="l">por Victor Faleiros<small>Planejamento de Aposentadoria</small></div>
+      <div class="r">${esc(dataStr)}</div>
+    </div>
+  </div>
+
+  <!-- VOCÊ HOJE -->
+  <div class="sheet">
+    <div class="sheet-head"><span>Onde você está hoje</span><span>${firstNames(nome)}</span></div>
+    <h2 class="title">Você, <em>hoje</em>.</h2>
+    <p class="lead-in">Estes são os dados que você preencheu na simulação. Eles são o ponto de partida de tudo o que vem a seguir.</p>
+    <div class="kv-grid">
+      <div class="kv"><div class="label">Idade hoje</div><div class="val">${idadeAtual} anos</div></div>
+      <div class="kv"><div class="label">Aposentadoria desejada</div><div class="val">${idadeApos} anos</div></div>
+      <div class="kv"><div class="label">Horizonte de acumulação</div><div class="val">${anos} anos</div></div>
+      <div class="kv"><div class="label">Perfil de carteira</div><div class="val">${esc(perfil)}</div></div>
+      <div class="kv"><div class="label">Patrimônio hoje</div><div class="val">${brl(patAtual)}</div></div>
+      <div class="kv"><div class="label">Aporte mensal</div><div class="val">${brl(aporte)} / mês</div></div>
+    </div>
+    ${foot}
+  </div>
+
+  <!-- ACUMULAÇÃO -->
+  <div class="sheet">
+    <div class="sheet-head"><span>Seu poder de acumulação</span><span>${firstNames(nome)}</span></div>
+    <h2 class="title">Seu poder de <em>acumulação</em>.</h2>
+    <p class="lead-in">Considerando o seu patrimônio atual, o aporte mensal e o prazo, esse é o número que você teria aos ${idadeApos} anos.</p>
+    <div class="params">
+      <div class="p"><div class="label">Patrimônio inicial</div><div class="val">${brl(patAtual)}</div></div>
+      <div class="p"><div class="label">Aporte mensal</div><div class="val">${brl(aporte)}</div></div>
+      <div class="p"><div class="label">Prazo</div><div class="val">${anos} anos</div></div>
+      <div class="p"><div class="label">Perfil</div><div class="val">${esc(perfil)}</div></div>
+    </div>
+    <div class="big-stat">
+      <div class="label">Patrimônio acumulado aos ${idadeApos} anos</div>
+      <div class="num">${brl(patNominal)}</div>
+    </div>
+    <p class="note">Aos ${idadeApos}, esse número estará na sua conta. Mas o que ele realmente comprará depende da inflação, um efeito que age silenciosamente ao longo do tempo. É o tema da próxima página.</p>
+    ${foot}
+  </div>
+
+  <!-- EFEITO INVISÍVEL -->
+  <div class="sheet">
+    <div class="sheet-head"><span>O efeito invisível</span><span>${firstNames(nome)}</span></div>
+    <h2 class="title">O efeito <em>invisível</em>.</h2>
+    <p class="body-p">Ao longo do tempo, o preço dos produtos e serviços sobe. Isso é o que chamamos de inflação: a perda do poder de compra do seu dinheiro com o passar dos anos. Você se lembra de quando era comum comprar uma Coca-Cola por 1 real, ou reservar um quarto de hotel por 60, 70 reais a diária? Esses aumentos acontecem porque o dinheiro vai perdendo valor. Veja o efeito da inflação sobre o seu patrimônio acumulado:</p>
+    <div class="duo">
+      <div class="cell"><div class="label">Em valor nominal</div><div class="num">${brl(patNominal)}</div><div class="cap">o que estará na sua conta</div></div>
+      <div class="cell"><div class="label">Em poder de compra de hoje</div><div class="num dim">${brl(patReal)}</div><div class="cap">o que esse dinheiro realmente comprará</div></div>
+      <div class="cell"><div class="label">Renda mensal nominal aos ${idadeApos}</div><div class="num">${brl(rendaNominal)} <span style="font-size:18px">/ mês</span></div></div>
+      <div class="cell"><div class="label">Em poder de compra de hoje</div><div class="num dim">${brl(rendaReal)} <span style="font-size:18px">/ mês</span></div></div>
+    </div>
+    <span class="infl-tag">Projeção considerando inflação de 4,5% ao ano</span>
+    <p class="body-p">Quando se faz uma projeção de aposentadoria, é preciso considerar esse efeito. Caso contrário, mesmo tendo um valor expressivo na conta, você acaba reduzindo o padrão de vida esperado sem perceber. Por isso, o que importa não é o número nominal, e sim o seu patrimônio em <em>valor real</em>: descontando a inflação para enxergar o futuro em poder de compra de hoje.</p>
+    ${foot}
+  </div>
+
+  <!-- FECHAMENTO -->
+  <div class="sheet">
+    <div class="sheet-head"><span>Próximo passo</span><span>${firstNames(nome)}</span></div>
+    <h2 class="title">Esse é o <em>primeiro passo</em>.</h2>
+    <div class="close-rule"></div>
+    <p class="body-p">Essa simulação já te mostra algo que a maioria das pessoas nunca enxerga: a diferença entre o número que aparece na conta e o que ele de fato vai comprar lá na frente.</p>
+    <p class="body-p">Um plano de verdade vai além de uma projeção. Ele considera o seu momento de vida, a sua carteira atual, os seus objetivos, e te dá um caminho claro, com ajustes possíveis, para chegar à aposentadoria que você quer, em poder de compra de hoje. Se você quiser transformar esse primeiro passo num plano completo, é exatamente nisso que eu faço.</p>
+    <div class="contact">
+      <div class="label">Conte comigo</div>
+      <div class="sig">Victor Faleiros, CFP®</div>
+      <div class="info">victorfaleiros@actgrupo.com.br<br>(11) 91897-1846</div>
+      <p class="disclaimer">Simulação baseada na rentabilidade histórica das carteiras (2010–2025) e em uma inflação estimada de 4,5% ao ano. Rentabilidade passada não garante resultados futuros. Este material é educativo e não constitui recomendação de investimento.</p>
+    </div>
+    ${foot}
+  </div>
+  `;
+}
+
+async function gerar(){
+  const phone = phoneEl.value;
+  const password = passEl.value.trim();
+  const err = document.getElementById("gateErr");
+  const btn = document.getElementById("genBtn");
+  err.textContent = "";
+  if(onlyDigits(phone).length < 10){ err.textContent = "Digite um WhatsApp válido com DDD."; return; }
+  if(!password){ err.textContent = "Digite a senha de acesso."; return; }
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Buscando...';
+  try{
+    const resp = await fetch(FN_URL, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ phone: onlyDigits(phone), password })
+    });
+    const data = await resp.json().catch(()=>({}));
+    if(resp.status === 401){ err.textContent = "Senha incorreta."; return; }
+    if(resp.status === 404){ err.textContent = "Nenhum lead encontrado com esse número. Confira o WhatsApp digitado."; return; }
+    if(!resp.ok || !data.lead){ err.textContent = "Não foi possível buscar o lead. Tente de novo."; return; }
+    try{ localStorage.setItem("vf_report_pass", password); }catch(e){}
+    document.getElementById("doc").innerHTML = buildReport(data.lead);
+    document.getElementById("gate").classList.add("hidden");
+    document.getElementById("toolbar").classList.remove("hidden");
+    document.getElementById("doc").classList.remove("hidden");
+    window.scrollTo(0,0);
+  }catch(e){
+    err.textContent = "Erro de conexão. Verifique a internet e tente novamente.";
+  }finally{
+    btn.disabled = false; btn.innerHTML = "Gerar relatório";
+  }
+}
+
+document.getElementById("genBtn").addEventListener("click", gerar);
+passEl.addEventListener("keydown", e=>{ if(e.key==="Enter") gerar(); });
+document.getElementById("pdfBtn").addEventListener("click", ()=>window.print());
+document.getElementById("newBtn").addEventListener("click", ()=>{
+  document.getElementById("doc").classList.add("hidden");
+  document.getElementById("toolbar").classList.add("hidden");
+  document.getElementById("gate").classList.remove("hidden");
+  phoneEl.value=""; phoneEl.focus();
+});
+</script>
+</body>
+</html>
