@@ -34,6 +34,18 @@ html,body{background:#3a3833;color:var(--ink);font-family:var(--sans);-webkit-fo
 .tb-btn{padding:10px 18px;border-radius:9px;border:1px solid rgba(242,238,228,0.25);background:transparent;color:var(--paper);font-size:13px;font-weight:600;font-family:var(--sans);cursor:pointer}
 .tb-btn.primary{background:var(--paper);color:var(--ink);border-color:var(--paper)}
 .tb-note{color:rgba(242,238,228,0.6);font-size:12px}
+/* ===== MENSAGEM (só tela) ===== */
+.msg-panel{max-width:794px;margin:18px auto 0;background:#2f2d27;border:1px solid rgba(242,238,228,0.12);border-radius:14px;padding:20px 22px;color:var(--paper)}
+.mp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:13px;flex-wrap:wrap}
+.mp-title{font-size:13px;font-weight:600;color:var(--paper)}
+.mp-sub{font-size:11px;color:rgba(242,238,228,0.55);margin-top:4px;line-height:1.5}
+.mp-badge{font-size:11px;font-weight:700;padding:5px 11px;border-radius:999px;letter-spacing:0.02em;white-space:nowrap}
+.mp-badge.in{background:rgba(37,211,102,0.16);color:#7ee2a8;border:1px solid rgba(37,211,102,0.4)}
+.mp-badge.out{background:rgba(242,238,228,0.08);color:rgba(242,238,228,0.7);border:1px solid rgba(242,238,228,0.22)}
+.mp-box{background:#26241f;border:1px solid rgba(242,238,228,0.1);border-radius:10px;padding:14px 15px;font-size:13.5px;line-height:1.65;color:#e9e5da;white-space:pre-wrap;font-family:var(--sans)}
+.mp-actions{margin-top:12px;display:flex;gap:12px;align-items:center}
+.mp-copy{padding:10px 18px;border-radius:9px;border:none;background:var(--paper);color:var(--ink);font-weight:600;font-size:13px;font-family:var(--sans);cursor:pointer}
+.mp-note{font-size:12px;color:#7ee2a8}
 /* ===== DOC ===== */
 .doc{max-width:794px;margin:0 auto;padding:22px 16px 60px}
 .sheet{background:var(--paper);width:100%;min-height:1040px;padding:60px 58px;margin-bottom:26px;position:relative;box-shadow:0 18px 50px rgba(0,0,0,0.4);display:flex;flex-direction:column}
@@ -95,7 +107,7 @@ h2.title em{font-style:italic}
 @media print{
   @page{size:A4;margin:0}
   html,body{background:#fff}
-  .gate,.toolbar{display:none!important}
+  .gate,.toolbar,.msg-panel,.noprint{display:none!important}
   .doc{max-width:none;margin:0;padding:0}
   .sheet{box-shadow:none;margin:0;width:210mm;min-height:297mm;padding:20mm 18mm;page-break-after:always;break-after:page;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .sheet:last-child{page-break-after:auto}
@@ -137,6 +149,9 @@ h2.title em{font-style:italic}
   <button class="tb-btn" id="newBtn">Nova busca</button>
   <span class="tb-note">Ao salvar: papel A4 e marque "Gráficos de fundo".</span>
 </div>
+
+<!-- MENSAGEM PARA O CLIENTE (só tela, não entra no PDF) -->
+<div class="msg-panel hidden" id="msgPanel"></div>
 
 <!-- DOC -->
 <div class="doc hidden" id="doc"></div>
@@ -272,6 +287,55 @@ function buildReport(lead){
   `;
 }
 
+function buildMessage(lead){
+  const nome = String(lead.nome||"").trim();
+  const primeiro = nome.split(" ")[0] || nome;
+  const idadeApos = +lead.idade_aposentadoria;
+  const anos = +lead.anos_contribuicao;
+  const patAtual = +lead.patrimonio_atual;
+  const aporte = +lead.aporte_mensal;
+  const patNominal = +lead.patrimonio_projetado;
+  const patReal = patNominal / Math.pow(1+INFLACAO, anos);
+  const qualifica = patAtual >= 300000 || aporte >= 10000;
+  let msg;
+  if(qualifica){
+    msg = `Oi ${primeiro}, tudo bem? Aqui é o Victor.\n\n`
+        + `Dei uma olhada na sua simulação. No seu ritmo atual, você projeta ${brl(patNominal)} aos ${idadeApos} anos. Mas, descontando a inflação, isso equivale a ${brl(patReal)} em poder de compra de hoje. É esse número que realmente importa.\n\n`
+        + `Pelo que você preencheu, dá pra construir um plano muito sólido pra sua aposentadoria. Eu acompanho de perto pessoas exatamente nesse momento, e gostaria de te mostrar, sem compromisso, como transformar essa simulação em um plano de verdade.\n\n`
+        + `Você teria uns 20 minutos essa semana pra gente conversar?`;
+  } else {
+    msg = `Oi ${primeiro}, tudo bem? Aqui é o Victor.\n\n`
+        + `Dei uma olhada na sua simulação. No seu ritmo atual, você projeta ${brl(patNominal)} aos ${idadeApos} anos, o que em poder de compra de hoje equivale a ${brl(patReal)}. A inflação corrói parte do resultado, e por isso o mais importante agora é manter a constância nos aportes.\n\n`
+        + `Continue firme, porque o tempo joga a favor de quem começa cedo. Conforme o seu patrimônio e os seus aportes forem crescendo, a gente estrutura um plano completo juntos. Qualquer dúvida, é só me chamar por aqui.`;
+  }
+  return { msg, qualifica, patAtual, aporte };
+}
+
+function renderMessage(lead){
+  const panel = document.getElementById("msgPanel");
+  const m = buildMessage(lead);
+  const badge = m.qualifica
+    ? `<span class="mp-badge in">✓ Dentro do seu perfil</span>`
+    : `<span class="mp-badge out">Fora do perfil principal</span>`;
+  panel.innerHTML =
+    `<div class="mp-head">`
+    + `<div><div class="mp-title">Mensagem para o cliente</div>`
+    + `<div class="mp-sub">Patrimônio hoje ${brl(m.patAtual)} · aporte ${brl(m.aporte)}/mês · esta mensagem não entra no PDF.</div></div>`
+    + badge + `</div>`
+    + `<div class="mp-box" id="mpBox">${esc(m.msg)}</div>`
+    + `<div class="mp-actions"><button class="mp-copy" id="mpCopy">Copiar mensagem</button><span class="mp-note" id="mpNote"></span></div>`;
+  document.getElementById("mpCopy").onclick = async () => {
+    const note = document.getElementById("mpNote");
+    try{ await navigator.clipboard.writeText(m.msg); note.textContent = "Copiado!"; }
+    catch(e){
+      const r = document.createRange(); r.selectNodeContents(document.getElementById("mpBox"));
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      note.textContent = "Selecionado: use Ctrl/Cmd + C";
+    }
+    setTimeout(()=>{ note.textContent=""; }, 2500);
+  };
+}
+
 async function gerar(){
   const phone = phoneEl.value;
   const password = passEl.value.trim();
@@ -292,8 +356,10 @@ async function gerar(){
     if(!resp.ok || !data.lead){ err.textContent = "Não foi possível buscar o lead. Tente de novo."; return; }
     try{ localStorage.setItem("vf_report_pass", password); }catch(e){}
     document.getElementById("doc").innerHTML = buildReport(data.lead);
+    renderMessage(data.lead);
     document.getElementById("gate").classList.add("hidden");
     document.getElementById("toolbar").classList.remove("hidden");
+    document.getElementById("msgPanel").classList.remove("hidden");
     document.getElementById("doc").classList.remove("hidden");
     window.scrollTo(0,0);
   }catch(e){
@@ -309,6 +375,7 @@ document.getElementById("pdfBtn").addEventListener("click", ()=>window.print());
 document.getElementById("newBtn").addEventListener("click", ()=>{
   document.getElementById("doc").classList.add("hidden");
   document.getElementById("toolbar").classList.add("hidden");
+  document.getElementById("msgPanel").classList.add("hidden");
   document.getElementById("gate").classList.remove("hidden");
   phoneEl.value=""; phoneEl.focus();
 });
