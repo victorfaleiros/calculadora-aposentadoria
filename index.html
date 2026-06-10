@@ -184,7 +184,6 @@ h1 .hl{color:var(--gold-light)}
       <div class="mini-stats">
         <div class="mini"><div class="m-label">Total que você vai aportar</div><div class="m-val" id="rAportado">R$ 0</div></div>
         <div class="mini"><div class="m-label">Rendimento acumulado</div><div class="m-val" id="rRendimento">R$ 0</div></div>
-        <div class="mini"><div class="m-label">Anos de jornada</div><div class="m-val" id="rAnos">0</div></div>
       </div>
 
       <div class="chart-box">
@@ -433,7 +432,6 @@ function renderResultado(calc, nome){
   document.getElementById("rRenda").textContent = fmt(calc.rendaPassiva);
   document.getElementById("rAportado").textContent = fmt(calc.totalAportado);
   document.getElementById("rRendimento").textContent = fmt(calc.rendimento);
-  document.getElementById("rAnos").textContent = calc.anos + " anos";
   document.getElementById("evoTitle").textContent = `Projeção com a volatilidade real do perfil ${calc.perfil}`;
   document.getElementById("evoCaption").innerHTML =
     `Uma trajetória possível: sobe no longo prazo, mas passa por quedas no caminho, como na história real desse perfil. O patrimônio final reflete a mesma rentabilidade média.`;
